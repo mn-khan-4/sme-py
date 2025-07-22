@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SME Assistant</title>
+  
+  <!-- Icons & Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <!-- Styles -->
+  <style>:root {
+  --primary: #4361ee;
+  --primary-light: #4895ef;
+  --primary-dark: #3f37c9;
+  --secondary: #7209b7;
+  --accent: #f72585;
+  --success: #4cc9f0;
+  --warning: #f8961e;
+  --text: #2b2d42;
+  --text-light: #8d99ae;
+  --bg: #f8f9fa;
+  --card-bg: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.08);
+  --border: #e9ecef;
+  --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --radius: 16px;
+  --chat-user-bg: #4361ee;
+  --chat-user-text: #ffffff;
+  --chat-agent-bg: #f1f3f5;
+  --chat-agent-text: #343a40;
+}
+
+/* Chat Container */
+.chat-container {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 350px;
+  max-width: 90%;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 25px var(--shadow);
+  animation: fadeInUp 0.6s ease;
+  transition: var(--transition);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+/* Hide chat by default */
+.hidden {
+  display: none !important;
+}
+
+/* Floating Toggle Button */
+.chat-toggle {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 1001;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.chat-toggle:hover {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+/* Chat Header */
+.chat-header {
+  padding: 20px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.chat-header i {
+  font-size: 24px;
+}
+
+/* Chat Messages */
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none" stroke="%238d99ae" stroke-width="0.5" opacity="0.1"/></svg>');
+}
+
+/* Messages */
+.message {
+  max-width: 80%;
+  padding: 14px 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px var(--shadow);
+  word-wrap: break-word;
+  line-height: 1.5;
+  animation: fadeIn 0.4s ease;
+}
+
+.user-message {
+  background: var(--chat-user-bg);
+  color: var(--chat-user-text);
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+}
+
+.agent-message {
+  background: var(--chat-agent-bg);
+  color: var(--chat-agent-text);
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+}
+
+.message-time {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 6px;
+  text-align: right;
+}
+
+/* Chat Input */
+.chat-input {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-top: 1px solid var(--border);
+  background: var(--card-bg);
+  gap: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  font-size: 15px;
+  outline: none;
+  box-shadow: inset 0 2px 6px var(--shadow);
+}
+
+.chat-input input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2);
+}
+
+/* Shared style for buttons */
+.chat-input button {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.chat-input button:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.agent-message button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  margin-top: 6px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.agent-message button:hover {
+  background: var(--primary-dark);
+}
+
+.download-btn {
+  margin-top: 8px;
+  background: var(--primary);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.download-btn:hover {
+  background: var(--primary-dark);
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle" title="Toggle Theme"></div>
+
+    <!-- App Container -->
+    <div class="app-container">
+      <!-- Chat Panel -->
+      <div class="chat-container hidden" id="chatContainer">
+        <div class="chat-header">
+          <i class="fas fa-comments"></i>
+          <h2>SME Assistant</h2>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-messages" id="chatMessages">
+          <div class="message agent-message">
+            Hello! I'm your SME Assistant. I can help you generate professional business documents. What type of document do you need today?
+            <div class="message-time">Just now</div>
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input">
+          <input type="text" id="messageInput" placeholder="Enter business info..." autocomplete="off"/>
+
+          <!-- Voice Button -->
+          <button id="micButton" title="Voice Input">
+            <i class="fas fa-microphone"></i>
+          </button>
+
+          <!-- Send Button -->
+          <button id="sendButton" title="Send Message">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Chat Icon -->
+  <div class="chat-toggle" id="chatToggle" title="Open Chat">
+    <i class="fas fa-comment-dots"></i>
+  </div>
+
+  <!-- Script -->
+<script>
+  const themeToggle = document.getElementById('themeToggle');
+  const body = document.body;
+
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+  if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme.matches)) {
+    body.classList.add('dark-theme');
+  }
+
+  themeToggle.addEventListener('click', () => {
+    body.classList.toggle('dark-theme');
+    themeToggle.style.transform = 'scale(1.1)';
+    setTimeout(() => themeToggle.style.transform = 'scale(1)', 300);
+    localStorage.setItem('theme', body.classList.contains('dark-theme') ? 'dark' : 'light');
+  });
+
+  const chatToggle = document.getElementById('chatToggle');
+  const chatContainer = document.querySelector('.chat-container');
+
+  chatToggle.addEventListener('click', () => {
+    chatContainer.classList.toggle('hidden');
+  });
+
+  const chatMessages = document.getElementById('chatMessages');
+  const messageInput = document.getElementById('messageInput');
+  const sendButton = document.getElementById('sendButton');
+  const micButton = document.getElementById('micButton');
+
+  function addMessage(text, isUser = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', isUser ? 'user-message' : 'agent-message');
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    messageDiv.innerHTML = `${text}<div class="message-time">${time}</div>`;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function showTypingIndicator() {
+    const typingDiv = document.createElement('div');
+    typingDiv.classList.add('typing-indicator');
+    typingDiv.id = 'typingIndicator';
+    typingDiv.innerHTML = `
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    `;
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return typingDiv;
+  }
+
+  function sendMessage() {
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, true);
+    messageInput.value = '';
+
+    const typingIndicator = showTypingIndicator();
+
+    fetch("http://127.0.0.1:5000/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: message })
+    })
+      .then(res => res.json())
+      .then(data => {
+        typingIndicator.remove();
+        if (data.response) {
+  addMessage(data.response, false);
+        } 
+
+        if (data.download_link) {
+          const btn = document.createElement("button");
+          btn.innerHTML = "📄 Download Document";
+          btn.classList.add("download-btn");
+          btn.onclick = () => {
+            window.open(data.download_link, "_blank");
+          };
+          const wrap = document.createElement("div");
+          wrap.classList.add("message", "agent-message");
+          wrap.appendChild(btn);
+          chatMessages.appendChild(wrap);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        if (data.type === "switch_prompt") {
+          const wrap = document.createElement("div");
+          wrap.classList.add("message", "agent-message");
+
+          const hrBtn = document.createElement("button");
+          hrBtn.textContent = "Switch to HR";
+          hrBtn.onclick = () => switchPersonality("HR");
+
+          const adminBtn = document.createElement("button");
+          adminBtn.textContent = "Switch to Admin";
+          adminBtn.onclick = () => switchPersonality("Admin");
+
+          wrap.appendChild(hrBtn);
+          wrap.appendChild(adminBtn);
+          chatMessages.appendChild(wrap);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      })
+      .catch(err => {
+        typingIndicator.remove();
+        addMessage("⚠️ Failed to process request. Try again later.", false);
+        console.error(err);
+      });
+  }
+
+  function switchPersonality(mode) {
+    fetch("http://127.0.0.1:5000/switch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ mode })
+    })
+      .then(res => res.json())
+      .then(data => {
+        addMessage(data.response || `✅ Switched to ${mode} mode.`);
+      })
+      .catch(err => {
+        addMessage("⚠️ Failed to switch personality.", false);
+        console.error(err);
+      });
+  }
+
+  sendButton.addEventListener('click', sendMessage);
+  messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  // Optional voice support
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    micButton.addEventListener('click', () => {
+      recognition.start();
+      micButton.classList.add('recording');
+    });
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      messageInput.value = transcript;
+      recognition.stop();
+      micButton.classList.remove('recording');
+    };
+
+    recognition.onerror = () => {
+      recognition.stop();
+      micButton.classList.remove('recording');
+    };
+  }
+
+  setTimeout(() => {
+    addMessage("Welcome! Tell me what document you need help with.");
+  }, 1000);
+</script>
+</body>
+</html>

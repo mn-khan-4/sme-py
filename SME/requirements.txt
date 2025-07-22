@@ -1,0 +1,6 @@
+flask
+python-docx
+mysql-connector-python
+jinja2
+python-dotenv
+requests
